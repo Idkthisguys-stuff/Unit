@@ -8,4 +8,6 @@ SECTIONS {
         }
     .data : {*(.data)}
     .bss : {*(.bss)}
+
+    kernel_end = .;
 }

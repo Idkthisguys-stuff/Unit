@@ -1,3 +1,7 @@
+#include "include/cpu.h"
+#include "include/gdt.h"
+#include "include/memory.h"
+
 #define IDT_SIZE 256
 #define KEYBOARD_STATUS_PORT 0x64
 #define KEYBOARD_DATA_PORT 0x60
@@ -123,10 +127,11 @@ void kmain(void) {
     ++i;
   }
 
+  gdt_init();
   idt_init();
+  heap_init();
 
   while (1) {
-
-    __asm__ __volatile__("hlt");
+    cpu_halt();
   }
 }

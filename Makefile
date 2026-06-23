@@ -1,26 +1,31 @@
-# Define variables
 CC = gcc
 AS = nasm
 BUILD_DIR = build
 SRC_DIR = src
 
-KERNEL = $(BUILD_DIR)/kernel
+C_SOURCES = $(shell find $(SRC_DIR) -name "*.c")
+ASM_SOURCES = $(shell find $(SRC_DIR) -name "*.asm")
 
-all: $(KERNEL)
+OBJ = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.c.o, $(C_SOURCES))
+OBJ += $(patsubst $(SRC_DIR)/%.asm, $(BUILD_DIR)/%.asm.o, $(ASM_SOURCES))
 
-$(KERNEL): $(BUILD_DIR)/kasm.o $(BUILD_DIR)/kc.o
-	ld -m elf_i386 -o $(KERNEL) -T $(SRC_DIR)/link.ld $^
+CFLAGS = -m32 -ffreestanding -fno-pie -fno-stack-protector -Iinclude -c
 
-$(BUILD_DIR)/kasm.o: $(SRC_DIR)/kernel.asm
-	mkdir -p $(BUILD_DIR)
+all: $(BUILD_DIR)/kernel
+
+$(BUILD_DIR)/kernel: $(OBJ)
+	ld -m elf_i386 -o $@ -T $(SRC_DIR)/link.ld $^
+
+$(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/%.asm.o: $(SRC_DIR)/%.asm
+	@mkdir -p $(dir $@)
 	$(AS) -f elf32 $< -o $@
-
-$(BUILD_DIR)/kc.o: $(SRC_DIR)/kernel.c
-	mkdir -p $(BUILD_DIR)
-	$(CC) -m32 -ffreestanding -fno-pie -fno-stack-protector -c $< -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)
 
-run:
-	qemu-system-i386 -kernel $(BUILD_DIR)/kernel
+run: $(BUILD_DIR)/kernel
+	qemu-system-i386 -kernel $<
