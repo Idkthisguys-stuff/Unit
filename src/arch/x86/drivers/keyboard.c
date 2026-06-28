@@ -1,13 +1,12 @@
 #define KEYBOARD_STATUS_PORT 0x64
 #define KEYBOARD_DATA_PORT 0x60
 
+#include "../../../../include/vga.h"
+
 unsigned char read_port(unsigned short port);
 void write_port(unsigned short port, unsigned char data);
 
 int shift_pressed = 0;
-
-extern char *vidptr;
-extern unsigned int current_loc;
 
 unsigned char keyboard_map[128] = {
     0,   27,  '1',  '2',  '3',  '4', '5', '6',  '7', '8', '9', '0',
