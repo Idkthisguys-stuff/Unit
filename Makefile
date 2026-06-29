@@ -61,7 +61,7 @@ $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/%.asm.o: $(SRC_DIR)/%.asm
+$(BUILD_DIR)/%.asm.o: $(SRC_DIR)/%.asmp
 	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) $< -o $@
 $(BUILD_DIR)/%.s.o: $(SRC_DIR)/%.s
@@ -70,6 +70,14 @@ $(BUILD_DIR)/%.s.o: $(SRC_DIR)/%.s
 
 clean:
 	rm -rf $(BUILD_DIR)
+	
+ifeq ($(HEADLESS),1)
+QEMU_FLAGS += -display none -vnc 0.0.0.0:1
+else
+QEMU_FLAGS += -serial stdio
+endif
 
 run: $(BUILD_DIR)/kernel
-	$(QEMU) $<
+	$(QEMU) $< $(QEMU_FLAGS)
+
+	
